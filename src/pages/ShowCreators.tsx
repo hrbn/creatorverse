@@ -1,56 +1,51 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { CreatorCard } from '../components/CreatorCard'
-import {
-  ensureStarterCreators,
-  fetchCreators,
-  getErrorMessage,
-} from '../services/creators'
-import type { Creator } from '../types'
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CreatorCard } from '../components/CreatorCard';
+import { ensureStarterCreators, fetchCreators, getErrorMessage } from '../services/creators';
+import type { Creator } from '../types';
 
 export function ShowCreators() {
-  const [creators, setCreators] = useState<Creator[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [reloadKey, setReloadKey] = useState(0)
+  const [creators, setCreators] = useState<Creator[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    let isCurrent = true
+    let isCurrent = true;
 
     async function loadCreators() {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
 
       try {
-        const creators = await fetchCreators()
-        const seededCreators = await ensureStarterCreators(creators)
+        const creators = await fetchCreators();
+        const seededCreators = await ensureStarterCreators(creators);
 
         if (isCurrent) {
-          setCreators(seededCreators)
+          setCreators(seededCreators);
         }
       } catch (loadError) {
         if (isCurrent) {
-          setError(getErrorMessage(loadError, 'Could not load creators.'))
+          setError(getErrorMessage(loadError, 'Could not load creators.'));
         }
       } finally {
         if (isCurrent) {
-          setIsLoading(false)
+          setIsLoading(false);
         }
       }
     }
 
-    void loadCreators()
+    void loadCreators();
 
     return () => {
-      isCurrent = false
-    }
-  }, [reloadKey])
+      isCurrent = false;
+    };
+  }, [reloadKey]);
 
   return (
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Creatorverse</p>
           <h1>Content creators collection</h1>
         </div>
         <Link className="button button-primary" to="/new">
@@ -63,11 +58,7 @@ export function ShowCreators() {
       {error ? (
         <div className="status-panel" role="alert">
           <p>{error}</p>
-          <button
-            className="button button-secondary"
-            type="button"
-            onClick={() => setReloadKey((key) => key + 1)}
-          >
+          <button className="button button-secondary" type="button" onClick={() => setReloadKey((key) => key + 1)}>
             Retry
           </button>
         </div>
@@ -90,5 +81,5 @@ export function ShowCreators() {
         </div>
       ) : null}
     </section>
-  )
+  );
 }

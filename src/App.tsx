@@ -1,80 +1,64 @@
-import { useEffect, useState } from 'react'
-import { BrowserRouter, Link, useLocation, useRoutes } from 'react-router-dom'
-import { AddCreator } from './pages/AddCreator'
-import { EditCreator } from './pages/EditCreator'
-import { ShowCreators } from './pages/ShowCreators'
-import { ViewCreator } from './pages/ViewCreator'
-import { fetchCreator } from './services/creators'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Link, useLocation, useRoutes } from 'react-router-dom';
+import { AddCreator } from './pages/AddCreator';
+import { EditCreator } from './pages/EditCreator';
+import { ShowCreators } from './pages/ShowCreators';
+import { ViewCreator } from './pages/ViewCreator';
+import { fetchCreator } from './services/creators';
+import './App.css';
 
 type Breadcrumb = {
-  label: string
-  to?: string
-}
+  label: string;
+  to?: string;
+};
 
 type CreatorRoute = {
-  id: string
-  isEditing: boolean
-}
+  id: string;
+  isEditing: boolean;
+};
 
 type LoadedCreatorName = {
-  id: string
-  name: string
-}
+  id: string;
+  name: string;
+};
 
 function getCreatorRoute(pathname: string): CreatorRoute | null {
-  const creatorMatch = pathname.match(/^\/creator\/([^/]+)(\/edit)?\/?$/)
+  const creatorMatch = pathname.match(/^\/creator\/([^/]+)(\/edit)?\/?$/);
 
-  if (!creatorMatch) return null
+  if (!creatorMatch) return null;
 
   return {
     id: creatorMatch[1],
-    isEditing: Boolean(creatorMatch[2]),
-  }
+    isEditing: Boolean(creatorMatch[2])
+  };
 }
 
-function getBreadcrumbs(
-  pathname: string,
-  creatorName: string | null,
-): Breadcrumb[] {
-  const creatorRoute = getCreatorRoute(pathname)
+function getBreadcrumbs(pathname: string, creatorName: string | null): Breadcrumb[] {
+  const creatorRoute = getCreatorRoute(pathname);
 
   if (pathname === '/') {
-    return [{ label: 'Creators' }]
+    return [{ label: 'Creators' }];
   }
 
   if (pathname === '/new') {
-    return [
-      { label: 'Creators', to: '/' },
-      { label: 'Add creator' },
-    ]
+    return [{ label: 'Creators', to: '/' }, { label: 'Add creator' }];
   }
 
   if (creatorRoute) {
-    const creatorPath = `/creator/${creatorRoute.id}`
+    const creatorPath = `/creator/${creatorRoute.id}`;
 
     if (!creatorName) {
-      return [{ label: 'Creators', to: '/' }]
+      return [{ label: 'Creators', to: '/' }];
     }
 
     if (creatorRoute.isEditing) {
-      return [
-        { label: 'Creators', to: '/' },
-        { label: creatorName, to: creatorPath },
-        { label: 'Edit' },
-      ]
+      return [{ label: 'Creators', to: '/' }, { label: creatorName, to: creatorPath }, { label: 'Edit' }];
     }
 
-    return [
-      { label: 'Creators', to: '/' },
-      { label: creatorName },
-    ]
+    return [{ label: 'Creators', to: '/' }, { label: creatorName }];
   }
 
-  return [
-    { label: 'Creators', to: '/' },
-    { label: 'Not found' },
-  ]
+  return [{ label: 'Creators', to: '/' }, { label: 'Not found' }];
 }
 
 function AppRoutes() {
@@ -83,8 +67,8 @@ function AppRoutes() {
     { path: '/new', element: <AddCreator /> },
     { path: '/creator/:id', element: <ViewCreator /> },
     { path: '/creator/:id/edit', element: <EditCreator /> },
-    { path: '*', element: <NotFound /> },
-  ])
+    { path: '*', element: <NotFound /> }
+  ]);
 }
 
 function NotFound() {
@@ -94,45 +78,44 @@ function NotFound() {
         <p>That page does not exist.</p>
       </div>
     </section>
-  )
+  );
 }
 
 function AppHeader() {
-  const location = useLocation()
-  const creatorRoute = getCreatorRoute(location.pathname)
-  const creatorId = creatorRoute?.id ?? null
-  const [loadedCreatorName, setLoadedCreatorName] = useState<LoadedCreatorName | null>(null)
-  const creatorName = loadedCreatorName?.id === creatorId ? loadedCreatorName.name : null
-  const breadcrumbs = getBreadcrumbs(location.pathname, creatorName)
-  const showAddCreatorAction = location.pathname !== '/new'
+  const location = useLocation();
+  const creatorRoute = getCreatorRoute(location.pathname);
+  const creatorId = creatorRoute?.id ?? null;
+  const [loadedCreatorName, setLoadedCreatorName] = useState<LoadedCreatorName | null>(null);
+  const creatorName = loadedCreatorName?.id === creatorId ? loadedCreatorName.name : null;
+  const breadcrumbs = getBreadcrumbs(location.pathname, creatorName);
 
   useEffect(() => {
-    let isCurrent = true
+    let isCurrent = true;
 
-    if (!creatorId) return
+    if (!creatorId) return;
 
     async function loadCreatorName() {
-      if (!creatorId) return
+      if (!creatorId) return;
 
       try {
-        const creator = await fetchCreator(creatorId)
+        const creator = await fetchCreator(creatorId);
 
         if (isCurrent) {
-          setLoadedCreatorName({ id: creatorId, name: creator.name })
+          setLoadedCreatorName({ id: creatorId, name: creator.name });
         }
       } catch {
         if (isCurrent) {
-          setLoadedCreatorName({ id: creatorId, name: '' })
+          setLoadedCreatorName({ id: creatorId, name: '' });
         }
       }
     }
 
-    void loadCreatorName()
+    void loadCreatorName();
 
     return () => {
-      isCurrent = false
-    }
-  }, [creatorId])
+      isCurrent = false;
+    };
+  }, [creatorId]);
 
   return (
     <header className="app-header">
@@ -158,15 +141,8 @@ function AppHeader() {
           ))}
         </ol>
       </nav>
-      {showAddCreatorAction ? (
-        <div className="app-header__actions">
-          <Link className="button button-secondary" to="/new">
-            Add creator
-          </Link>
-        </div>
-      ) : null}
     </header>
-  )
+  );
 }
 
 function App() {
@@ -179,7 +155,7 @@ function App() {
         </main>
       </div>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
