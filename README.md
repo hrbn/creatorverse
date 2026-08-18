@@ -36,7 +36,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented required features:
 
-![Video Walkthrough](https://imglink.cc/cdn/Fqh9Gwr6rQ.gif)
+![Video Walkthrough](https://imglink.cc/cdn/qBZzLr08Mi.gif)
 
 GIF created with macOS screen recording and ffmpeg.
 

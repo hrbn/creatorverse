@@ -2,6 +2,7 @@
 
 node_modules
 dist
+supabase
 
 .vscode/*
 !.vscode/extensions.json

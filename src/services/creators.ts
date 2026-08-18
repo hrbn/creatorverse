@@ -5,6 +5,8 @@ import type { Creator, CreatorFormValues, CreatorPayload } from '../types'
 const creatorColumns = 'id,name,url,description,imageURL'
 const starterSeedKey = 'creatorverse:starter-creators-seeded'
 
+let starterSeedRequest: Promise<Creator[]> | null = null
+
 export const emptyCreatorForm: CreatorFormValues = {
   name: '',
   url: '',
@@ -105,14 +107,30 @@ export async function ensureStarterCreators(creators: Creator[]) {
     return creators
   }
 
-  const { data, error } = await supabase
-    .from('creators')
-    .insert(starterCreators)
-    .select(creatorColumns)
+  // StrictMode mounts effects twice in development, so two callers can both see
+  // an empty table before either insert lands. Claim the guard up front and let
+  // the second caller await the first request instead of seeding again.
+  if (!starterSeedRequest) {
+    window.localStorage.setItem(starterSeedKey, 'true')
+    starterSeedRequest = seedStarterCreators()
+  }
 
-  if (error) throw error
+  return starterSeedRequest
+}
 
-  window.localStorage.setItem(starterSeedKey, 'true')
+async function seedStarterCreators(): Promise<Creator[]> {
+  try {
+    const { data, error } = await supabase
+      .from('creators')
+      .insert(starterCreators)
+      .select(creatorColumns)
 
-  return data ?? []
+    if (error) throw error
+
+    return data ?? []
+  } catch (seedError) {
+    window.localStorage.removeItem(starterSeedKey)
+    starterSeedRequest = null
+    throw seedError
+  }
 }
